@@ -434,10 +434,13 @@
 
     .services-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.5px;
       background: var(--border);
       border: 1px solid var(--border);
+    }
+    @media (max-width: 640px) {
+      .services-grid { grid-template-columns: 1fr; }
     }
 
     .service-card {
@@ -880,23 +883,23 @@
   <!-- ── MARQUEE ──────────────────────────────────────────────────────────── -->
   <div class="marquee-strip">
     <div class="marquee-track">
-      <span class="marquee-item">Penetration Testing</span>
+      <span class="marquee-item">Advanced Security Testing</span>
       <span class="marquee-item">Vulnerability Management</span>
-      <span class="marquee-item">Threat Modelling</span>
-      <span class="marquee-item">Red Team Assessments</span>
+      <span class="marquee-item">Attack Path Modelling</span>
+      <span class="marquee-item">Red Team Operations</span>
       <span class="marquee-item">Web Application Security</span>
-      <span class="marquee-item">Network Security</span>
-      <span class="marquee-item">Mobile Security</span>
-      <span class="marquee-item">Security Architecture</span>
+      <span class="marquee-item">Network Penetration Testing</span>
+      <span class="marquee-item">Security Advisory</span>
+      <span class="marquee-item">Threat Modelling</span>
       <!-- duplicate for seamless loop -->
-      <span class="marquee-item">Penetration Testing</span>
+      <span class="marquee-item">Advanced Security Testing</span>
       <span class="marquee-item">Vulnerability Management</span>
-      <span class="marquee-item">Threat Modelling</span>
-      <span class="marquee-item">Red Team Assessments</span>
+      <span class="marquee-item">Attack Path Modelling</span>
+      <span class="marquee-item">Red Team Operations</span>
       <span class="marquee-item">Web Application Security</span>
-      <span class="marquee-item">Network Security</span>
-      <span class="marquee-item">Mobile Security</span>
-      <span class="marquee-item">Security Architecture</span>
+      <span class="marquee-item">Network Penetration Testing</span>
+      <span class="marquee-item">Security Advisory</span>
+      <span class="marquee-item">Threat Modelling</span>
     </div>
   </div>
 
@@ -909,8 +912,8 @@
           <h2 class="section-title">Security services,<br><em>precisely delivered.</em></h2>
         </div>
         <p class="section-desc reveal reveal-d2">
-          Every engagement is led by senior practitioners. No junior consultants,
-          no templated reports — only rigorous, tailored assessments.
+          Over 15 years of hands-on experience across industries — each engagement
+          is rigorous, tailored, and built around your specific risk landscape.
         </p>
       </div>
       <div class="services-grid">
@@ -921,17 +924,18 @@
           <div class="service-icon">
             <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
-          <h3 class="service-name">Penetration Testing</h3>
+          <h3 class="service-name">Advanced Security Testing</h3>
           <p class="service-desc">
-            Adversary-simulated attacks against your real infrastructure, revealing exploitable
-            weaknesses before malicious actors do.
+            Real-world adversarial testing across your full attack surface — from web and mobile
+            applications to internal networks, APIs, and human vectors.
           </p>
           <div class="service-tags">
             <span class="tag">Web App</span>
             <span class="tag">Network</span>
             <span class="tag">Mobile</span>
-            <span class="tag">Social Eng.</span>
             <span class="tag">API</span>
+            <span class="tag">Social Eng.</span>
+            <span class="tag">Red Team</span>
           </div>
         </div>
 
@@ -943,14 +947,14 @@
           </div>
           <h3 class="service-name">Vulnerability Management</h3>
           <p class="service-desc">
-            Continuous identification, prioritization, and remediation guidance for vulnerabilities
-            across your entire attack surface.
+            Systematic discovery, prioritization, and tracking of vulnerabilities across your
+            environment — turning raw findings into a managed, measurable programme.
           </p>
           <div class="service-tags">
-            <span class="tag">Scanning</span>
-            <span class="tag">Triage</span>
-            <span class="tag">Reporting</span>
+            <span class="tag">Discovery</span>
+            <span class="tag">Risk Triage</span>
             <span class="tag">Remediation</span>
+            <span class="tag">Reporting</span>
           </div>
         </div>
 
@@ -958,17 +962,18 @@
         <div class="service-card reveal reveal-d2">
           <span class="service-num">03</span>
           <div class="service-icon">
-            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M8.46 8.46a5 5 0 0 0 0 7.07"/></svg>
           </div>
-          <h3 class="service-name">Threat Modelling</h3>
+          <h3 class="service-name">Attack Path Modelling</h3>
           <p class="service-desc">
-            Structured analysis of how adversaries could target your systems — mapped to your
-            architecture before a single line of production code ships.
+            Mapping how an attacker would move through your environment — identifying the
+            paths of least resistance before they are discovered and exploited.
           </p>
           <div class="service-tags">
-            <span class="tag">STRIDE</span>
+            <span class="tag">Threat Modelling</span>
             <span class="tag">MITRE ATT&CK</span>
-            <span class="tag">Design Review</span>
+            <span class="tag">Lateral Movement</span>
+            <span class="tag">STRIDE</span>
           </div>
         </div>
 
@@ -978,16 +983,16 @@
           <div class="service-icon">
             <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
           </div>
-          <h3 class="service-name">Security Assessments</h3>
+          <h3 class="service-name">Security Advisory</h3>
           <p class="service-desc">
-            Comprehensive reviews of your security posture, controls, and compliance readiness
-            — delivering a clear, actionable roadmap.
+            Strategic guidance on security posture, architecture decisions, and programme
+            maturity — helping organizations build security in, not bolt it on.
           </p>
           <div class="service-tags">
-            <span class="tag">Architecture</span>
-            <span class="tag">Cloud</span>
+            <span class="tag">Architecture Review</span>
+            <span class="tag">Cloud Security</span>
             <span class="tag">Compliance</span>
-            <span class="tag">Code Review</span>
+            <span class="tag">Secure SDLC</span>
           </div>
         </div>
 
@@ -1013,8 +1018,8 @@
             <div class="pillar reveal reveal-d1">
               <span class="pillar-num">01</span>
               <div class="pillar-text">
-                <h3>Senior-Led Engagements</h3>
-                <p>Every assessment is owned by experienced practitioners. You get direct access to the expert — not a project manager relaying findings.</p>
+                <h3>15+ Years in the Field</h3>
+                <p>Deep, hands-on expertise across a wide range of industries and environments. You work directly with the person doing the work — not a relay.</p>
               </div>
             </div>
             <div class="pillar reveal reveal-d2">
@@ -1097,15 +1102,7 @@
             </div>
             <div class="contact-item">
               <span class="contact-item-key">Engagements</span>
-              <span class="contact-item-val">Remote &amp; On-site</span>
-            </div>
-            <div class="contact-item">
-              <span class="contact-item-key">Availability</span>
-              <span class="contact-item-val"><span class="status-dot">Accepting clients</span></span>
-            </div>
-            <div class="contact-item">
-              <span class="contact-item-key">Response time</span>
-              <span class="contact-item-val">Within 24 hours</span>
+              <span class="contact-item-val">Remote</span>
             </div>
           </div>
         </div>
