@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astrolabe Security — Precision. Trust. Clarity.</title>
+  <meta name="description" content="Astrolabe Security LLC provides elite cybersecurity consulting — penetration testing, vulnerability management, and threat modelling for organizations that take security seriously." />
+
+  <!-- Security headers via meta (supplements server-level headers) -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── TOKENS ──────────────────────────────────────────────────────────── */
+    :root {
+      --bg:         #080810;
+      --bg-surface: #0d0d1a;
+      --bg-raised:  #111120;
+      --gold:       #c8a96e;
+      --gold-dim:   rgba(200, 169, 110, 0.18);
+      --gold-glow:  rgba(200, 169, 110, 0.08);
+      --teal:       #3dd6c0;
+      --teal-dim:   rgba(61, 214, 192, 0.12);
+      --text:       #e2ddd4;
+      --text-muted: #7a7a8c;
+      --text-faint: #3a3a4e;
+      --border:     rgba(200, 169, 110, 0.12);
+      --border-teal:rgba(61, 214, 192, 0.15);
+      --radius:     2px;
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-mono:    'IBM Plex Mono', monospace;
+      --font-body:    'IBM Plex Sans', sans-serif;
+    }
+
+    /* ─── RESET ───────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.7;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ─── STAR FIELD ──────────────────────────────────────────────────────── */
+    #star-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+
+    /* ─── NAV ─────────────────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 clamp(1.5rem, 5vw, 4rem);
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.4s, background 0.4s, backdrop-filter 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(8, 8, 16, 0.82);
+      backdrop-filter: blur(14px);
+      border-color: var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    /* ── Logo placeholder: swap this <div> for your <img> or inline <svg> ── */
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .logo-mark svg {
+      width: 100%;
+      height: 100%;
+    }
+    .logo-wordmark {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--text);
+    }
+    .logo-wordmark span {
+      color: var(--gold);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    .nav-cta {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      padding: 0.55rem 1.2rem;
+      border-radius: var(--radius);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .nav-cta:hover {
+      background: var(--gold-dim);
+      border-color: var(--gold);
+    }
+
+    /* ─── HERO ────────────────────────────────────────────────────────────── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 0 clamp(1.5rem, 8vw, 10rem);
+      padding-top: 68px;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* Radial glow behind hero content */
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 900px;
+      height: 900px;
+      background: radial-gradient(ellipse, rgba(200,169,110,0.055) 0%, transparent 60%),
+                  radial-gradient(ellipse at 60% 40%, rgba(61,214,192,0.04) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Astrolabe rings */
+    .astrolabe-rings {
+      position: absolute;
+      right: clamp(-200px, -5vw, 80px);
+      top: 50%;
+      transform: translateY(-50%);
+      width: clamp(480px, 55vw, 760px);
+      height: clamp(480px, 55vw, 760px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.38;
+    }
+    .ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+    .ring-1 { inset: 0;   border-color: rgba(200,169,110,0.22); animation: spin 80s linear infinite; }
+    .ring-2 { inset: 8%;  border-color: rgba(61,214,192,0.14);  animation: spin 55s linear infinite reverse; }
+    .ring-3 { inset: 17%; border-color: rgba(200,169,110,0.16); animation: spin 120s linear infinite; }
+    .ring-4 { inset: 26%; border-color: rgba(61,214,192,0.10);  animation: spin 40s linear infinite reverse; }
+    .ring-5 { inset: 38%; border-color: rgba(200,169,110,0.12); animation: spin 90s linear infinite; }
+    .ring-6 { inset: 50%; border-color: rgba(61,214,192,0.08);  animation: spin 70s linear infinite reverse; }
+
+    .ring-tick {
+      position: absolute;
+      top: 50%;
+      width: 50%;
+      height: 1px;
+      transform-origin: right center;
+    }
+    .ring-tick::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -2px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+    .ring-tick-teal::after { background: var(--teal); }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .ring-crosshair {
+      position: absolute;
+      inset: 0;
+    }
+    .ring-crosshair::before,
+    .ring-crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(200,169,110,0.08);
+    }
+    .ring-crosshair::before { /* horizontal */
+      top: 50%; left: 0; right: 0;
+      height: 1px;
+      transform: translateY(-50%);
+    }
+    .ring-crosshair::after { /* vertical */
+      left: 50%; top: 0; bottom: 0;
+      width: 1px;
+      transform: translateX(-50%);
+    }
+
+    /* Hero content */
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 680px;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1px;
+      background: var(--teal);
+    }
+
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(3.2rem, 6.5vw, 6rem);
+      font-weight: 300;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 1.6rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.35s forwards;
+    }
+    .hero-headline em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      max-width: 500px;
+      margin-bottom: 3rem;
+      font-weight: 300;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.5s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.65s forwards;
+    }
+    .btn-primary {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: var(--bg);
+      padding: 0.85rem 2rem;
+      border-radius: var(--radius);
+      font-weight: 500;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .btn-ghost {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s, gap 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); gap: 0.75rem; }
+    .btn-ghost::after {
+      content: '→';
+      font-size: 0.9rem;
+    }
+
+    /* ─── MARQUEE ─────────────────────────────────────────────────────────── */
+    .marquee-strip {
+      position: relative;
+      z-index: 2;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      overflow: hidden;
+      background: linear-gradient(90deg, var(--bg) 0%, var(--bg-surface) 50%, var(--bg) 100%);
+    }
+    .marquee-track {
+      display: flex;
+      gap: 3.5rem;
+      width: max-content;
+      animation: marquee 30s linear infinite;
+    }
+    .marquee-item {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 3.5rem;
+    }
+    .marquee-item::after {
+      content: '◆';
+      color: var(--gold);
+      opacity: 0.5;
+      font-size: 0.4rem;
+    }
+    @keyframes marquee {
+      to { transform: translateX(-50%); }
+    }
+
+    /* ─── SECTION SHARED ──────────────────────────────────────────────────── */
+    section {
+      position: relative;
+      z-index: 1;
+    }
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 5vw, 4rem);
+    }
+    .section-pad {
+      padding-top: clamp(5rem, 10vw, 9rem);
+      padding-bottom: clamp(5rem, 10vw, 9rem);
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 1px;
+      background: var(--teal);
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+      font-weight: 300;
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      margin-bottom: 1.4rem;
+    }
+    .section-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+    .section-desc {
+      color: var(--text-muted);
+      max-width: 520px;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      font-weight: 300;
+    }
+
+    /* ─── SERVICES ────────────────────────────────────────────────────────── */
+    #services {
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-surface) 100%);
+    }
+
+    .services-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .service-card {
+      background: var(--bg-surface);
+      padding: 2.4rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+      cursor: default;
+    }
+    .service-card:hover {
+      background: var(--bg-raised);
+    }
+    .service-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .service-card:hover::after { opacity: 1; }
+
+    .service-icon {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.6rem;
+      position: relative;
+      transition: border-color 0.3s;
+    }
+    .service-card:hover .service-icon {
+      border-color: rgba(200,169,110,0.4);
+    }
+    .service-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--gold);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .service-num {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--text-faint);
+      letter-spacing: 0.1em;
+    }
+
+    .service-name {
+      font-family: var(--font-display);
+      font-size: 1.42rem;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+    .service-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      font-weight: 300;
+    }
+
+    .service-tags {
+      margin-top: 1.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      border: 1px solid var(--text-faint);
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .service-card:hover .tag {
+      color: var(--gold);
+      border-color: rgba(200,169,110,0.3);
+    }
+
+    /* ─── WHY ASTROLABE ───────────────────────────────────────────────────── */
+    #why {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .why-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+    @media (max-width: 820px) {
+      .why-inner { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    .why-left .section-desc { max-width: 100%; }
+
+    .why-visual {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 360px;
+    }
+    .why-ring-anim {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+    .wring-1 { width: 340px; height: 340px; border-color: rgba(200,169,110,0.1);  animation: spin 100s linear infinite; }
+    .wring-2 { width: 270px; height: 270px; border-color: rgba(61,214,192,0.12); animation: spin  65s linear infinite reverse; }
+    .wring-3 { width: 200px; height: 200px; border-color: rgba(200,169,110,0.15); animation: spin  82s linear infinite; }
+    .wring-4 { width: 130px; height: 130px; border-color: rgba(61,214,192,0.1); animation: spin  48s linear infinite reverse; }
+    .wring-center {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,169,110,0.4);
+      background: radial-gradient(circle, rgba(200,169,110,0.12), transparent 70%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    .wring-center::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 12px rgba(200,169,110,0.6);
+    }
+
+    /* Ticks on why rings */
+    .why-tick {
+      position: absolute;
+      width: 50%;
+      height: 1px;
+      transform-origin: right center;
+    }
+    .why-tick::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -3px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .why-tick-gold::after { background: var(--gold); box-shadow: 0 0 6px rgba(200,169,110,0.5); }
+    .why-tick-teal::after { background: var(--teal); box-shadow: 0 0 6px rgba(61,214,192,0.5); }
+
+    .pillars {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .pillar {
+      padding: 1.6rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 1.4rem;
+      align-items: flex-start;
+    }
+    .pillar:last-child { border-bottom: none; }
+    .pillar-num {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+    }
+    .pillar-text h3 {
+      font-family: var(--font-display);
+      font-size: 1.22rem;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+    .pillar-text p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      font-weight: 300;
+    }
+
+    /* ─── CONTACT ─────────────────────────────────────────────────────────── */
+    #contact {
+      background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg) 100%);
+    }
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+    @media (max-width: 820px) {
+      .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    .contact-email-block {
+      margin-top: 2.5rem;
+    }
+    .contact-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .contact-email {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+      font-weight: 300;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+      transition: opacity 0.2s;
+    }
+    .contact-email:hover { opacity: 0.8; }
+    .contact-line {
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+      margin-top: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .contact-sub {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      font-weight: 300;
+      max-width: 320px;
+    }
+
+    .contact-right {
+      padding-top: 0.5rem;
+    }
+    .contact-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .contact-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .contact-item:first-child { border-top: 1px solid var(--border); }
+    .contact-item-key {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+    .contact-item-val {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--teal);
+    }
+    .status-dot::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 6px rgba(61,214,192,0.6);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* ─── FOOTER ──────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.2rem clamp(1.5rem, 5vw, 4rem);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+    }
+    .footer-brand span { color: var(--gold); }
+    .footer-meta {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      color: var(--text-faint);
+      text-align: right;
+    }
+
+    /* ─── SCROLL REVEAL ───────────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.75s ease, transform 0.75s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+    .reveal-d4 { transition-delay: 0.4s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── MOBILE NAV ──────────────────────────────────────────────────────── */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 1px;
+      background: var(--text-muted);
+      transition: 0.3s;
+    }
+    @media (max-width: 720px) {
+      .nav-links, .nav-cta { display: none; }
+      .nav-toggle { display: flex; }
+    }
+    @media (max-width: 560px) {
+      .astrolabe-rings { opacity: 0.15; right: -120px; }
+      .hero-headline { font-size: 2.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── STAR CANVAS ──────────────────────────────────────────────────────── -->
+  <canvas id="star-canvas"></canvas>
+
+  <!-- ── NAV ─────────────────────────────────────────────────────────────── -->
+  <nav id="nav">
+    <div class="nav-logo">
+      <!-- LOGO PLACEHOLDER ─────────────────────────────────────────────────
+           Replace the SVG below with your actual logo.
+           Recommended: export your logo as an SVG, inline it here,
+           or use: <img src="logo.svg" alt="Astrolabe Security" width="36" height="36">
+      ──────────────────────────────────────────────────────────────────────-->
+      <div class="logo-mark">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="18" r="16.5" stroke="#c8a96e" stroke-width="0.8" stroke-opacity="0.7"/>
+          <circle cx="18" cy="18" r="11.5" stroke="#3dd6c0" stroke-width="0.8" stroke-opacity="0.5"/>
+          <circle cx="18" cy="18" r="6"    stroke="#c8a96e" stroke-width="0.8" stroke-opacity="0.6"/>
+          <line x1="18" y1="1.5"  x2="18" y2="34.5" stroke="#c8a96e" stroke-width="0.6" stroke-opacity="0.3"/>
+          <line x1="1.5" y1="18" x2="34.5" y2="18"  stroke="#c8a96e" stroke-width="0.6" stroke-opacity="0.3"/>
+          <circle cx="18" cy="18" r="2.2" fill="#c8a96e" fill-opacity="0.9"/>
+          <circle cx="18" cy="6.5"  r="1.2" fill="#3dd6c0" fill-opacity="0.8"/>
+          <circle cx="29.5" cy="18" r="1"   fill="#c8a96e" fill-opacity="0.6"/>
+        </svg>
+      </div>
+      <div class="logo-wordmark">Astrolabe <span>Security</span></div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#why">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="mailto:contact@astrolabesecurity.com" class="nav-cta">Get in Touch</a>
+    <div class="nav-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- ── HERO ────────────────────────────────────────────────────────────── -->
+  <section id="hero">
+    <div class="astrolabe-rings">
+      <div class="ring ring-1">
+        <div class="ring-tick" style="transform:rotate(42deg)"></div>
+        <div class="ring-tick ring-tick-teal" style="transform:rotate(218deg)"></div>
+      </div>
+      <div class="ring ring-2">
+        <div class="ring-tick ring-tick-teal" style="transform:rotate(127deg)"></div>
+      </div>
+      <div class="ring ring-3">
+        <div class="ring-tick" style="transform:rotate(305deg)"></div>
+      </div>
+      <div class="ring ring-4">
+        <div class="ring-tick ring-tick-teal" style="transform:rotate(68deg)"></div>
+      </div>
+      <div class="ring ring-5"></div>
+      <div class="ring ring-6"></div>
+      <div class="ring-crosshair"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow">Cybersecurity Consultancy</div>
+      <h1 class="hero-headline">
+        Navigate every<br>
+        threat with<br>
+        <em>precision.</em>
+      </h1>
+      <p class="hero-sub">
+        Astrolabe Security delivers expert-led security services to organizations that
+        understand the true cost of a breach — before it happens.
+      </p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Engage Us</a>
+        <a href="#services" class="btn-ghost">Our Services</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MARQUEE ──────────────────────────────────────────────────────────── -->
+  <div class="marquee-strip">
+    <div class="marquee-track">
+      <span class="marquee-item">Penetration Testing</span>
+      <span class="marquee-item">Vulnerability Management</span>
+      <span class="marquee-item">Threat Modelling</span>
+      <span class="marquee-item">Red Team Assessments</span>
+      <span class="marquee-item">Web Application Security</span>
+      <span class="marquee-item">Network Security</span>
+      <span class="marquee-item">Mobile Security</span>
+      <span class="marquee-item">Security Architecture</span>
+      <!-- duplicate for seamless loop -->
+      <span class="marquee-item">Penetration Testing</span>
+      <span class="marquee-item">Vulnerability Management</span>
+      <span class="marquee-item">Threat Modelling</span>
+      <span class="marquee-item">Red Team Assessments</span>
+      <span class="marquee-item">Web Application Security</span>
+      <span class="marquee-item">Network Security</span>
+      <span class="marquee-item">Mobile Security</span>
+      <span class="marquee-item">Security Architecture</span>
+    </div>
+  </div>
+
+  <!-- ── SERVICES ─────────────────────────────────────────────────────────── -->
+  <section id="services" class="section-pad">
+    <div class="container">
+      <div class="services-header">
+        <div class="reveal">
+          <div class="section-label">What We Do</div>
+          <h2 class="section-title">Security services,<br><em>precisely delivered.</em></h2>
+        </div>
+        <p class="section-desc reveal reveal-d2">
+          Every engagement is led by senior practitioners. No junior consultants,
+          no templated reports — only rigorous, tailored assessments.
+        </p>
+      </div>
+      <div class="services-grid">
+
+        <!-- 1 -->
+        <div class="service-card reveal">
+          <span class="service-num">01</span>
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="service-name">Penetration Testing</h3>
+          <p class="service-desc">
+            Adversary-simulated attacks against your real infrastructure, revealing exploitable
+            weaknesses before malicious actors do.
+          </p>
+          <div class="service-tags">
+            <span class="tag">Web App</span>
+            <span class="tag">Network</span>
+            <span class="tag">Mobile</span>
+            <span class="tag">Social Eng.</span>
+            <span class="tag">API</span>
+          </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="service-card reveal reveal-d1">
+          <span class="service-num">02</span>
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </div>
+          <h3 class="service-name">Vulnerability Management</h3>
+          <p class="service-desc">
+            Continuous identification, prioritization, and remediation guidance for vulnerabilities
+            across your entire attack surface.
+          </p>
+          <div class="service-tags">
+            <span class="tag">Scanning</span>
+            <span class="tag">Triage</span>
+            <span class="tag">Reporting</span>
+            <span class="tag">Remediation</span>
+          </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="service-card reveal reveal-d2">
+          <span class="service-num">03</span>
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </div>
+          <h3 class="service-name">Threat Modelling</h3>
+          <p class="service-desc">
+            Structured analysis of how adversaries could target your systems — mapped to your
+            architecture before a single line of production code ships.
+          </p>
+          <div class="service-tags">
+            <span class="tag">STRIDE</span>
+            <span class="tag">MITRE ATT&CK</span>
+            <span class="tag">Design Review</span>
+          </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="service-card reveal reveal-d3">
+          <span class="service-num">04</span>
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <h3 class="service-name">Security Assessments</h3>
+          <p class="service-desc">
+            Comprehensive reviews of your security posture, controls, and compliance readiness
+            — delivering a clear, actionable roadmap.
+          </p>
+          <div class="service-tags">
+            <span class="tag">Architecture</span>
+            <span class="tag">Cloud</span>
+            <span class="tag">Compliance</span>
+            <span class="tag">Code Review</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── WHY ASTROLABE ─────────────────────────────────────────────────────── -->
+  <section id="why" class="section-pad">
+    <div class="container">
+      <div class="why-inner">
+
+        <div class="why-left">
+          <div class="reveal">
+            <div class="section-label">Why Astrolabe</div>
+            <h2 class="section-title">Guided by<br><em>craft & clarity.</em></h2>
+          </div>
+          <p class="section-desc reveal reveal-d1" style="margin-bottom:3rem;">
+            The astrolabe was humanity's first precision instrument — used to navigate
+            the unknown by mapping what is known. That is exactly what we do for your security.
+          </p>
+          <div class="pillars">
+            <div class="pillar reveal reveal-d1">
+              <span class="pillar-num">01</span>
+              <div class="pillar-text">
+                <h3>Senior-Led Engagements</h3>
+                <p>Every assessment is owned by experienced practitioners. You get direct access to the expert — not a project manager relaying findings.</p>
+              </div>
+            </div>
+            <div class="pillar reveal reveal-d2">
+              <span class="pillar-num">02</span>
+              <div class="pillar-text">
+                <h3>Methodical & Thorough</h3>
+                <p>We follow structured methodologies — OWASP, PTES, MITRE ATT&CK — and go beyond automated tooling to find what scanners miss.</p>
+              </div>
+            </div>
+            <div class="pillar reveal reveal-d3">
+              <span class="pillar-num">03</span>
+              <div class="pillar-text">
+                <h3>Actionable Intelligence</h3>
+                <p>Our reports are built for your engineering team — clear risk ratings, verified evidence, and remediation guidance that makes sense.</p>
+              </div>
+            </div>
+            <div class="pillar reveal reveal-d4">
+              <span class="pillar-num">04</span>
+              <div class="pillar-text">
+                <h3>Trusted & Discreet</h3>
+                <p>Security work demands confidentiality. All engagements are governed by formal agreements and handled with the highest professional standards.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="why-visual reveal reveal-d2">
+          <div class="why-ring-anim">
+            <div class="wring wring-1">
+              <div class="why-tick why-tick-gold" style="transform:rotate(55deg)"></div>
+              <div class="why-tick why-tick-teal" style="transform:rotate(230deg)"></div>
+            </div>
+            <div class="wring wring-2">
+              <div class="why-tick why-tick-teal" style="transform:rotate(140deg)"></div>
+            </div>
+            <div class="wring wring-3">
+              <div class="why-tick why-tick-gold" style="transform:rotate(310deg)"></div>
+            </div>
+            <div class="wring wring-4">
+              <div class="why-tick why-tick-teal" style="transform:rotate(75deg)"></div>
+            </div>
+            <div class="wring-center"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACT ───────────────────────────────────────────────────────────── -->
+  <section id="contact" class="section-pad">
+    <div class="container">
+      <div class="contact-inner">
+
+        <div class="reveal">
+          <div class="section-label">Get in Touch</div>
+          <h2 class="section-title">Ready to<br><em>get started?</em></h2>
+          <div class="contact-email-block">
+            <div class="contact-label">Email us directly</div>
+            <a href="mailto:contact@astrolabesecurity.com" class="contact-email">
+              contact@astrolabesecurity.com
+            </a>
+            <div class="contact-line"></div>
+            <p class="contact-sub">
+              We respond promptly to all enquiries. Tell us about your organization
+              and the challenge you're facing.
+            </p>
+          </div>
+        </div>
+
+        <div class="contact-right reveal reveal-d2">
+          <div class="contact-items">
+            <div class="contact-item">
+              <span class="contact-item-key">Company</span>
+              <span class="contact-item-val">Astrolabe Security LLC</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-item-key">Jurisdiction</span>
+              <span class="contact-item-val">Wyoming, USA</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-item-key">Engagements</span>
+              <span class="contact-item-val">Remote &amp; On-site</span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-item-key">Availability</span>
+              <span class="contact-item-val"><span class="status-dot">Accepting clients</span></span>
+            </div>
+            <div class="contact-item">
+              <span class="contact-item-key">Response time</span>
+              <span class="contact-item-val">Within 24 hours</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ────────────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer-brand">
+      Astrolabe <span>Security</span> LLC
+    </div>
+    <div class="footer-meta">
+      &copy; 2026 Astrolabe Security LLC &nbsp;·&nbsp; All rights reserved
+    </div>
+  </footer>
+
+  <!-- ── SCRIPTS ───────────────────────────────────────────────────────────── -->
+  <script>
+    /* ── Star field ──────────────────────────────────────────────────────── */
+    (function () {
+      const canvas = document.getElementById('star-canvas');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function createStars(n) {
+        stars = [];
+        for (let i = 0; i < n; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 0.8 + 0.2,
+            o: Math.random() * 0.7 + 0.1,
+            speed: Math.random() * 0.003 + 0.001,
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      function draw(t) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          const alpha = s.o * (0.6 + 0.4 * Math.sin(t * s.speed + s.phase));
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(226, 221, 212, ${alpha})`;
+          ctx.fill();
+        }
+      }
+
+      let frame;
+      function tick(t) {
+        draw(t);
+        frame = requestAnimationFrame(tick);
+      }
+
+      resize();
+      createStars(220);
+      requestAnimationFrame(tick);
+
+      window.addEventListener('resize', () => {
+        resize();
+        createStars(220);
+      });
+    })();
+
+    /* ── Nav scroll state ────────────────────────────────────────────────── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    }, { passive: true });
+
+    /* ── Scroll reveal ───────────────────────────────────────────────────── */
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => io.observe(el));
+
+    /* ── Smooth anchor scroll ────────────────────────────────────────────── */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+</body>
+</html>
